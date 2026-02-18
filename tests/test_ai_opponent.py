@@ -168,6 +168,21 @@ class TestMinimaxTerminalStates:
         score = ai.minimax(board, 0, True)
         assert score == 0  # Zero score for draw
 
+    def test_minimax_legacy_signature_compatibility(self):
+        """Regression: minimax should work with legacy call signature."""
+        board = Board()
+        ai = AIOpponent(CellState.X)
+
+        # Terminal winning position for X to keep evaluation fast and deterministic
+        for col in range(4):
+            board.set_cell(0, col, CellState.X)
+
+        legacy_score = ai.minimax(board, 0, True)
+        explicit_score = ai.minimax(board, 0, True, float('-inf'), float('inf'))
+
+        assert legacy_score == explicit_score
+        assert legacy_score > 0
+
 
 class TestAIMoveValidity:
     """Tests for AI move validity."""

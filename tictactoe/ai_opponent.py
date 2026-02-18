@@ -53,8 +53,9 @@ class AIOpponent:
         
         return best_move
     
-    def minimax(self, board: Board, depth: int, is_maximizing: bool, 
-                alpha: float, beta: float, max_depth: int = None) -> float:
+    def minimax(self, board: Board, depth: int, is_maximizing: bool,
+                alpha: float = float('-inf'), beta: float = float('inf'),
+                max_depth: int = None) -> float:
         """
         Minimax algorithm with alpha-beta pruning to evaluate board positions.
         
