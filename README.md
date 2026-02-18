@@ -1,114 +1,289 @@
-# 4x4 Tic Tac Toe with AI Opponent
+# 4x4 Tic Tac Toe AI (Minimax + Alpha-Beta Pruning)
 
-A Python implementation of 4x4 Tic Tac Toe featuring an AI opponent that uses the minimax algorithm with alpha-beta pruning optimization.
+A clean Python implementation of 4x4 Tic Tac Toe with a command-line UI and an AI opponent that uses pure minimax with alpha-beta pruning.
 
-## Features
+This README is viva-focused: it covers architecture, algorithm design, complexity, testing strategy, likely viva questions, and known implementation trade-offs.
 
-- 4x4 game board (16 cells instead of the traditional 9)
-- Intelligent AI opponent using minimax with alpha-beta pruning
-- Command-line interface
-- Comprehensive test suite with unit and property-based tests
+---
 
-## Requirements
+## 1) Problem Statement
 
-- Python 3.7 or higher
-- pytest (for running tests)
-- hypothesis (for property-based tests)
+Build a 4x4 Tic Tac Toe game where:
+- Board size is 4x4 (16 cells).
+- Win condition is 4 same marks in a row, column, or diagonal.
+- Human plays against an AI.
+- AI chooses optimal moves using minimax with alpha-beta pruning.
 
-## Installation
+Why 4x4 is interesting:
+- State space is much larger than classic 3x3 Tic Tac Toe.
+- Minimax remains correct but computationally heavier, making pruning important.
 
-1. Clone or download this repository
-2. Create a virtual environment (recommended):
-   ```
-   python -m venv venv
-   ```
-3. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - Linux/Mac: `source venv/bin/activate`
-4. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+---
 
-## How to Play
+## 2) Key Features
 
-Run the game with:
-```
-python main.py
-```
+- 4x4 board representation using an internal 1D list.
+- Strict move validation and turn management.
+- Win detection for rows, columns, and both diagonals.
+- AI opponent with:
+   - Minimax recursion
+   - Alpha-beta pruning
+   - Depth-sensitive scoring (faster wins, slower losses)
+- CLI game loop with user input parsing and board rendering.
+- Unit tests for board, engine, win logic, and AI decision behavior.
+- Regression coverage for minimax API compatibility.
 
-### Game Rules
+---
 
-- The board is a 4x4 grid with positions numbered 0-3 for both rows and columns
-- You play as X, the AI plays as O
-- Players alternate turns
-- To win, get 4 marks in a row (horizontally, vertically, or diagonally)
-- If all 16 cells are filled with no winner, the game is a draw
+## 3) Tech Stack
 
-### Making Moves
+- Python 3.x
+- pytest for unit tests
+- hypothesis listed in dependencies (available for property-based tests)
 
-When it's your turn, enter your move as two numbers separated by a space:
-```
-Enter your move (row col): 0 1
-```
+Dependencies are in requirements.txt:
+- pytest>=7.4.0
+- hypothesis>=6.82.0
 
-This places your mark at row 0, column 1.
+---
 
-## Running Tests
+## 4) Project Structure
 
-Run the complete test suite:
-```
-pytest tests/ -v
-```
-
-Run specific test files:
-```
-pytest tests/test_board.py -v
-pytest tests/test_game_engine.py -v
-pytest tests/test_win_detection.py -v
-pytest tests/test_ai_opponent.py -v
-```
-
-## Project Structure
-
-```
 .
+├── main.py
+├── requirements.txt
+├── README.md
 ├── tictactoe/
 │   ├── __init__.py
-│   ├── board.py              # Board component
-│   ├── game_engine.py        # Game logic and state management
-│   ├── win_detection.py      # Win condition checking
-│   ├── ai_opponent.py        # AI with minimax + alpha-beta pruning
-│   └── user_interface.py     # CLI interface
-├── tests/
-│   ├── __init__.py
-│   ├── test_board.py
-│   ├── test_game_engine.py
-│   ├── test_win_detection.py
-│   └── test_ai_opponent.py
-├── main.py                   # Entry point
-├── requirements.txt
-└── README.md
-```
+│   ├── board.py
+│   ├── win_detection.py
+│   ├── game_engine.py
+│   ├── ai_opponent.py
+│   └── user_interface.py
+└── tests/
+      ├── __init__.py
+      ├── test_board.py
+      ├── test_win_detection.py
+      ├── test_game_engine.py
+      └── test_ai_opponent.py
 
-## AI Algorithm
+Module responsibilities:
+- board.py: Data model for board state and low-level operations.
+- win_detection.py: Pure functions to check wins.
+- game_engine.py: Rules, turns, and game status transitions.
+- ai_opponent.py: Minimax + alpha-beta decision making.
+- user_interface.py: Console interaction and display.
+- main.py: Entry point and exception-safe launch.
 
-The AI uses the minimax algorithm with alpha-beta pruning:
+---
 
-- **Minimax**: Explores all possible game states to find the optimal move
-- **Alpha-Beta Pruning**: Optimizes the search by eliminating branches that cannot affect the final decision
-- **Scoring**: Prefers faster wins and slower losses
+## 5) How to Run
 
-The AI plays optimally, making it very challenging to beat!
+### Setup
 
-## Development
+1. Create a virtual environment:
+    python -m venv venv
 
-This project follows a spec-driven development approach with:
-- Comprehensive requirements documentation
-- Detailed design specifications
-- Property-based testing for correctness verification
-- Unit tests for specific scenarios
+2. Activate:
+    - Windows: venv\Scripts\activate
+    - Linux/Mac: source venv/bin/activate
 
-## License
+3. Install requirements:
+    pip install -r requirements.txt
 
-This project is provided as-is for educational purposes.
+### Start the game
+
+python main.py
+
+### CLI usage notes
+
+- Human = X, AI = O.
+- Enter move as: row col
+- Valid row/col range: 0 to 3.
+- Example input: 2 1
+
+---
+
+## 6) Core Design and Data Model
+
+### Cell states
+
+An enum defines:
+- EMPTY = 0
+- X = 1
+- O = 2
+
+### Board representation
+
+- Internally, board uses a flat list of 16 elements.
+- Mapping:
+   - index = row * 4 + col
+   - row = index // 4
+   - col = index % 4
+
+Benefits:
+- Compact memory layout.
+- Easy copy operation for minimax branching.
+
+### Engine state
+
+Game status enum:
+- IN_PROGRESS
+- X_WINS
+- O_WINS
+- DRAW
+
+GameEngine guarantees:
+- No move after terminal state.
+- Turn alternates only after successful move.
+- Status updates immediately after each accepted move.
+
+---
+
+## 7) AI Algorithm (Viva-Important)
+
+### Minimax idea
+
+The AI simulates all possible future games from a candidate move and assumes:
+- AI plays optimally to maximize score.
+- Opponent plays optimally to minimize score.
+
+### Terminal evaluation
+
+For a board state at recursion depth d:
+- AI win: score = 10 - d
+- Player win: score = d - 10
+- Draw: score = 0
+
+Why depth term matters:
+- Earlier win gives larger positive score.
+- Earlier loss gives more negative score.
+- So AI prefers fast wins and delayed losses.
+
+### Alpha-beta pruning
+
+At each node:
+- alpha = best guaranteed score so far for maximizing player.
+- beta = best guaranteed score so far for minimizing player.
+
+If beta <= alpha, further exploration of that branch is unnecessary and is pruned.
+
+### Complexity discussion
+
+Let b = branching factor (remaining empty cells), d = search depth.
+- Plain minimax worst case: O(b^d)
+- Space (recursion): O(d)
+- Alpha-beta best-case pruning can reduce effective explored nodes significantly.
+
+In 4x4, early game branching is high, so full-depth search from the initial position is expensive. Practical tests use near-terminal boards to keep execution fast and deterministic.
+
+---
+
+## 8) API Notes and Compatibility
+
+Current minimax signature accepts explicit alpha/beta and also supports legacy calls:
+
+minimax(board, depth, is_maximizing, alpha=-inf, beta=inf, max_depth=None)
+
+Compatibility behavior:
+- Legacy style minimax(board, depth, is_maximizing) remains valid.
+- Explicit alpha/beta calls are supported for advanced control.
+
+Regression protection:
+- tests/test_ai_opponent.py includes a regression test that ensures legacy and explicit calls produce identical results on a deterministic terminal state.
+
+---
+
+## 9) Testing Strategy
+
+Run all tests:
+
+pytest -q
+
+Current status at last verification:
+- 55 passed
+
+Test coverage by area:
+- test_board.py:
+   - initialization
+   - set/get operations
+   - bounds checks and invalid values
+   - full-board detection
+   - empty-cell listing
+   - deep copy independence
+- test_win_detection.py:
+   - all row/column wins
+   - both diagonal wins
+   - non-winning patterns
+   - combined check_win behavior
+- test_game_engine.py:
+   - game initialization
+   - turn alternation
+   - move rejection rules
+   - win and draw status transitions
+- test_ai_opponent.py:
+   - AI initialization and mark assignment
+   - immediate win selection
+   - opponent threat blocking
+   - win-vs-block prioritization
+   - terminal scoring correctness
+   - move validity on constrained boards
+   - minimax API compatibility regression
+
+---
+
+## 10) Error Handling and Validation
+
+Implemented safeguards:
+- Invalid board indices raise ValueError.
+- Attempt to set EMPTY mark raises ValueError.
+- Invalid starting player raises ValueError.
+- Invalid AI mark raises ValueError.
+- Occupied cell move returns False (no overwrite).
+- main.py catches KeyboardInterrupt for graceful exit.
+- main.py catches unexpected exceptions and exits with error code.
+
+---
+
+## 11) Limitations and Future Extensions
+
+Current limitations:
+- CLI only (no GUI).
+- No transposition table or memoization in minimax.
+- No opening-book heuristics.
+- Full-depth search on sparse 4x4 boards can be slow.
+
+Reasonable future improvements:
+- Add memoization (hash board states).
+- Add iterative deepening with time budget.
+- Add heuristic evaluation for depth-limited search.
+- Add optional GUI (Tkinter/PyGame/Web).
+- Add benchmarking script for node counts and pruning efficiency.
+
+---
+
+## 12) Quick Viva Q&A Cheat Sheet
+
+Q: Why minimax here?
+A: Tic Tac Toe is a deterministic, zero-sum, perfect-information game, so minimax gives optimal play under optimal opponent assumptions.
+
+Q: Why alpha-beta pruning?
+A: It preserves optimality while avoiding exploration of provably irrelevant branches, reducing practical compute cost.
+
+Q: Why use depth in score?
+A: To break ties among terminal outcomes by preferring faster wins and slower losses.
+
+Q: How do you ensure game correctness?
+A: Separation of concerns plus dedicated tests for board rules, win logic, state transitions, and AI decisions.
+
+Q: Why store board as 1D list instead of 2D list?
+A: Simpler contiguous storage, straightforward index math, and easy cloning for minimax branches.
+
+Q: What ensures compatibility after API changes?
+A: A regression test locks minimax legacy-call behavior to prevent accidental breaking changes.
+
+---
+
+## 13) License
+
+Provided for educational and academic use.
