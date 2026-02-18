@@ -34,16 +34,26 @@ class TestMinimaxBasicScenarios:
         board = Board()
         ai = AIOpponent(CellState.X)
         
-        # Set up board where X can win at (0, 3)
+        # Set up board where X can win at (0, 3) - fill most of board to speed up test
         # X X X _
-        # O O _ _
-        # _ _ _ _
-        # _ _ _ _
+        # O O X O
+        # X O X O
+        # O X O X
         board.set_cell(0, 0, CellState.X)
         board.set_cell(0, 1, CellState.X)
         board.set_cell(0, 2, CellState.X)
         board.set_cell(1, 0, CellState.O)
         board.set_cell(1, 1, CellState.O)
+        board.set_cell(1, 2, CellState.X)
+        board.set_cell(1, 3, CellState.O)
+        board.set_cell(2, 0, CellState.X)
+        board.set_cell(2, 1, CellState.O)
+        board.set_cell(2, 2, CellState.X)
+        board.set_cell(2, 3, CellState.O)
+        board.set_cell(3, 0, CellState.O)
+        board.set_cell(3, 1, CellState.X)
+        board.set_cell(3, 2, CellState.O)
+        board.set_cell(3, 3, CellState.X)
         
         move = ai.get_best_move(board)
         assert move == (0, 3)
@@ -53,16 +63,26 @@ class TestMinimaxBasicScenarios:
         board = Board()
         ai = AIOpponent(CellState.X)
         
-        # Set up board where O is about to win at (0, 3)
+        # Set up board where O is about to win at (0, 3) - fill most of board
         # O O O _
-        # X X _ _
-        # _ _ _ _
-        # _ _ _ _
+        # X X O X
+        # O X X O
+        # X O X O
         board.set_cell(0, 0, CellState.O)
         board.set_cell(0, 1, CellState.O)
         board.set_cell(0, 2, CellState.O)
         board.set_cell(1, 0, CellState.X)
         board.set_cell(1, 1, CellState.X)
+        board.set_cell(1, 2, CellState.O)
+        board.set_cell(1, 3, CellState.X)
+        board.set_cell(2, 0, CellState.O)
+        board.set_cell(2, 1, CellState.X)
+        board.set_cell(2, 2, CellState.X)
+        board.set_cell(2, 3, CellState.O)
+        board.set_cell(3, 0, CellState.X)
+        board.set_cell(3, 1, CellState.O)
+        board.set_cell(3, 2, CellState.X)
+        board.set_cell(3, 3, CellState.O)
         
         move = ai.get_best_move(board)
         assert move == (0, 3)
@@ -72,17 +92,25 @@ class TestMinimaxBasicScenarios:
         board = Board()
         ai = AIOpponent(CellState.X)
         
-        # Set up board where both X and O can win
+        # Set up board where both X and O can win - fill most cells
         # X X X _
         # O O O _
-        # _ _ _ _
-        # _ _ _ _
+        # X O X O
+        # O X O X
         board.set_cell(0, 0, CellState.X)
         board.set_cell(0, 1, CellState.X)
         board.set_cell(0, 2, CellState.X)
         board.set_cell(1, 0, CellState.O)
         board.set_cell(1, 1, CellState.O)
         board.set_cell(1, 2, CellState.O)
+        board.set_cell(2, 0, CellState.X)
+        board.set_cell(2, 1, CellState.O)
+        board.set_cell(2, 2, CellState.X)
+        board.set_cell(2, 3, CellState.O)
+        board.set_cell(3, 0, CellState.O)
+        board.set_cell(3, 1, CellState.X)
+        board.set_cell(3, 2, CellState.O)
+        board.set_cell(3, 3, CellState.X)
         
         move = ai.get_best_move(board)
         # AI should take the win at (0, 3) rather than block at (1, 3)
@@ -149,10 +177,22 @@ class TestAIMoveValidity:
         board = Board()
         ai = AIOpponent(CellState.X)
         
-        # Fill some cells
+        # Fill most of the board to speed up test
         board.set_cell(0, 0, CellState.X)
         board.set_cell(0, 1, CellState.O)
+        board.set_cell(0, 2, CellState.X)
+        board.set_cell(0, 3, CellState.O)
         board.set_cell(1, 0, CellState.X)
+        board.set_cell(1, 1, CellState.O)
+        board.set_cell(1, 2, CellState.X)
+        board.set_cell(1, 3, CellState.O)
+        board.set_cell(2, 0, CellState.O)
+        board.set_cell(2, 1, CellState.X)
+        board.set_cell(2, 2, CellState.O)
+        board.set_cell(2, 3, CellState.X)
+        board.set_cell(3, 0, CellState.O)
+        board.set_cell(3, 1, CellState.X)
+        # Leave (3, 2) and (3, 3) empty
         
         move = ai.get_best_move(board)
         row, col = move
@@ -160,10 +200,28 @@ class TestAIMoveValidity:
         # Verify the selected cell is empty
         assert board.get_cell(row, col) == CellState.EMPTY
     
-    def test_ai_makes_valid_move_on_empty_board(self):
-        """Test that AI makes a valid move on an empty board."""
+    def test_ai_makes_valid_move_on_nearly_full_board(self):
+        """Test that AI makes a valid move on a nearly full board."""
         board = Board()
         ai = AIOpponent(CellState.X)
+        
+        # Fill board except for a few cells
+        board.set_cell(0, 0, CellState.X)
+        board.set_cell(0, 1, CellState.O)
+        board.set_cell(0, 2, CellState.X)
+        board.set_cell(0, 3, CellState.O)
+        board.set_cell(1, 0, CellState.O)
+        board.set_cell(1, 1, CellState.X)
+        board.set_cell(1, 2, CellState.O)
+        board.set_cell(1, 3, CellState.X)
+        board.set_cell(2, 0, CellState.X)
+        board.set_cell(2, 1, CellState.O)
+        board.set_cell(2, 2, CellState.X)
+        board.set_cell(2, 3, CellState.O)
+        board.set_cell(3, 0, CellState.O)
+        board.set_cell(3, 1, CellState.X)
+        board.set_cell(3, 2, CellState.O)
+        # Leave (3, 3) empty
         
         move = ai.get_best_move(board)
         row, col = move

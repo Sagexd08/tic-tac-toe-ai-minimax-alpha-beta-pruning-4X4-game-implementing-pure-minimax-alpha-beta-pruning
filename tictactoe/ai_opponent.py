@@ -1,6 +1,6 @@
 """AI opponent using minimax algorithm for 4x4 Tic Tac Toe."""
 
-from typing import Tuple, Optional
+from typing import Tuple
 from tictactoe.board import Board, CellState
 from tictactoe.win_detection import check_win
 
@@ -21,12 +21,13 @@ class AIOpponent:
         self.ai_mark = ai_mark
         self.player_mark = CellState.O if ai_mark == CellState.X else CellState.X
     
-    def get_best_move(self, board: Board) -> Tuple[int, int]:
+    def get_best_move(self, board: Board, max_depth: int = None) -> Tuple[int, int]:
         """
         Find the best move using minimax algorithm with alpha-beta pruning.
         
         Args:
             board: The current game board
+            max_depth: Maximum search depth (None for unlimited)
             
         Returns:
             Tuple of (row, col) for the best move
@@ -42,7 +43,7 @@ class AIOpponent:
             test_board.set_cell(row, col, self.ai_mark)
             
             # Evaluate using minimax with alpha-beta pruning
-            score = self.minimax(test_board, 0, False, alpha, beta)
+            score = self.minimax(test_board, 0, False, alpha, beta, max_depth)
             
             if score > best_score:
                 best_score = score
@@ -53,7 +54,7 @@ class AIOpponent:
         return best_move
     
     def minimax(self, board: Board, depth: int, is_maximizing: bool, 
-                alpha: float, beta: float) -> float:
+                alpha: float, beta: float, max_depth: int = None) -> float:
         """
         Minimax algorithm with alpha-beta pruning to evaluate board positions.
         
@@ -63,6 +64,7 @@ class AIOpponent:
             is_maximizing: True if maximizing player's turn, False otherwise
             alpha: Best score for maximizing player
             beta: Best score for minimizing player
+            max_depth: Maximum search depth (None for unlimited)
             
         Returns:
             The score of the position
@@ -75,12 +77,16 @@ class AIOpponent:
         if board.is_full():
             return 0  # Draw
         
+        # Check depth limit
+        if max_depth is not None and depth >= max_depth:
+            return 0  # Neutral evaluation at depth limit
+        
         if is_maximizing:
             max_eval = float('-inf')
             for row, col in board.get_empty_cells():
                 test_board = board.copy()
                 test_board.set_cell(row, col, self.ai_mark)
-                eval_score = self.minimax(test_board, depth + 1, False, alpha, beta)
+                eval_score = self.minimax(test_board, depth + 1, False, alpha, beta, max_depth)
                 max_eval = max(max_eval, eval_score)
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
@@ -91,7 +97,7 @@ class AIOpponent:
             for row, col in board.get_empty_cells():
                 test_board = board.copy()
                 test_board.set_cell(row, col, self.player_mark)
-                eval_score = self.minimax(test_board, depth + 1, True, alpha, beta)
+                eval_score = self.minimax(test_board, depth + 1, True, alpha, beta, max_depth)
                 min_eval = min(min_eval, eval_score)
                 beta = min(beta, eval_score)
                 if beta <= alpha:
